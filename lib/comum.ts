@@ -10,11 +10,11 @@ import {
 
 import {
     readyListener,
-    changeListener,
-    unLinkDirListener,
-    addDirListener,
     addListener,
     unLinkListener,
+    changeListener,
+    addDirListener,
+    unLinkDirListener,
 } from './listeners/listeners'
 
 export const comum = (sharedFolder: string, dstFolder: string) => {
@@ -24,11 +24,11 @@ export const comum = (sharedFolder: string, dstFolder: string) => {
     const watcher = makeWatcher(src);
 
     watcher.on('ready', readyListener(src, dst));
-    watcher.on('change', changeListener(src, dst));
     watcher.on('add', addListener(src, dst));
+    watcher.on('unlink', unLinkListener(src, dst));
+    watcher.on('change', changeListener(src, dst));
     watcher.on('addDir', addDirListener(src, dst));
     watcher.on('unlinkDir', unLinkDirListener(src, dst));
-    watcher.on('unlink', unLinkListener(src, dst));
 }
 
 export const test = () => {

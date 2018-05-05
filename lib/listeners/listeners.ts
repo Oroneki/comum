@@ -1,6 +1,6 @@
 // import * as chalk from 'chalk';
-import * as chokidar from 'chokidar';
-import * as path from 'path';
+import * as chokidar from "chokidar";
+// import * as path from 'path';
 import * as fs from 'fs';
 
 import {
@@ -22,9 +22,9 @@ export const readyListener = (src: string, dst: string) => () => {
     log('Monitoring ', src, '-->', dst);
 }
 
-export const unLinkDirListener = (src: string, dst: string) => (path: string) => {
-    const dstDir = getDestFileMaker(src, dst)(path);
-    log(`Deleted ${path} -> ${dstDir}`);
+export const unLinkDirListener = (src: string, dst: string) => (targetPath: string) => {
+    const dstDir = getDestFileMaker(src, dst)(targetPath);
+    log(`Deleted ${targetPath} -> ${dstDir}`);
     fs.rmdir(dstDir, (err) => {
         if (err) {
             log('ERRO', err);
@@ -34,9 +34,9 @@ export const unLinkDirListener = (src: string, dst: string) => (path: string) =>
     });
 }
 
-export const unLinkListener = (src: string, dst: string) => (path: string) => {
-    const dstDir = getDestFileMaker(src, dst)(path);
-    log(`Deleted ${path} -> ${dstDir}`);
+export const unLinkListener = (src: string, dst: string) => (targetPath: string) => {
+    const dstDir = getDestFileMaker(src, dst)(targetPath);
+    log(`Deleted ${targetPath} -> ${dstDir}`);
     fs.unlink(dstDir, (err) => {
         if (err) {
             log('ERRO', err);
@@ -46,10 +46,10 @@ export const unLinkListener = (src: string, dst: string) => (path: string) => {
     });
 }
 
-export const changeListener = (src: string, dst: string) => (path: string, stats: IStats) => {
-    const dstDir = getDestFileMaker(src, dst)(path);
-    log(`File changed: ${path} --> ${dstDir}`);
-    fs.copyFile(path, dstDir, (err) => {
+export const changeListener = (src: string, dst: string) => (targetPath: string, stats: IStats) => {
+    const dstDir = getDestFileMaker(src, dst)(targetPath);
+    log(`File changed: ${targetPath} --> ${dstDir}`);
+    fs.copyFile(targetPath, dstDir, (err) => {
         if (err) {
             log('Erro copia', err)
             return
@@ -59,12 +59,12 @@ export const changeListener = (src: string, dst: string) => (path: string, stats
 
 }
 
-export const addListener = (src: string, dst: string) => async (path: string, stats: IStats) => {
-    const dstDir = getDestFileMaker(src, dst)(path);
-    log(`File created: ${path} --> ${dstDir}`);
+export const addListener = (src: string, dst: string) => async (targetPath: string, stats: IStats) => {
+    const dstDir = getDestFileMaker(src, dst)(targetPath);
+    log(`File created: ${targetPath} --> ${dstDir}`);
     if (await folderOrFileExists(dstDir)) {
         log(` Exists ${dstDir}. Compare...`);
-        if (await filesAreEqual(dstDir, path)) {
+        if (await filesAreEqual(dstDir, targetPath)) {
             log(' Arquivos iguais... pula');
             return
         }
@@ -75,7 +75,7 @@ export const addListener = (src: string, dst: string) => async (path: string, st
     if (!ok) {
         log('Erro na criacao dos subdiretorios')
     }
-    fs.copyFile(path, dstDir, (err) => {
+    fs.copyFile(targetPath, dstDir, (err) => {
         if (err) {
             log('Erro copia', err)
             return
@@ -84,9 +84,9 @@ export const addListener = (src: string, dst: string) => async (path: string, st
     })
 }
 
-export const addDirListener = (src: string, dst: string) => (path: string, stats: IStats) => {
-    const dstDir = getDestFileMaker(src, dst)(path);
-    log(`File created: ${path} --> ${dstDir}`);
+export const addDirListener = (src: string, dst: string) => (targetPath: string, stats: IStats) => {
+    const dstDir = getDestFileMaker(src, dst)(targetPath);
+    log(`File created: ${targetPath} --> ${dstDir}`);
     fs.mkdir(dstDir, (err) => {
         if (err) {
             log('Erro copia', err)
