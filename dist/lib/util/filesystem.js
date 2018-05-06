@@ -77,7 +77,7 @@ exports.isFile1OrDirectory2OrNotExists0 = function (fullpath) {
     return new Promise(function (resolve, reject) {
         fs.stat(fullpath, function (err, stats) {
             if (err) {
-                utils_1.deb("[isFile1OrDirectory2OrNotExists0] %s (err) %O", fullpath, err);
+                utils_1.deb("[isFile1OrDirectory2OrNotExists0] NotExists %s", fullpath);
                 resolve(interfaces_1.EFileDirectoryNotExists.notExists);
                 return;
             }

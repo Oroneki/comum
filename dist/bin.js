@@ -3,7 +3,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var comum_1 = require("./lib/comum");
 var utils_1 = require("./lib/util/utils");
-// test();
 if (!process.argv[2] || !process.argv[3]) {
     utils_1.log("provide source folder and destination folder.");
     process.exit(1);
