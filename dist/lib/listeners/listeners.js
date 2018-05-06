@@ -43,90 +43,141 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 var _this = this;
 Object.defineProperty(exports, "__esModule", { value: true });
+// import * as path from 'path';
 var fs = __importStar(require("fs"));
 var utils_1 = require("../util/utils");
 var filesystem_1 = require("../util/filesystem");
 exports.readyListener = function (src, dst) { return function () {
-    utils_1.log('Monitoring ', src, '-->', dst);
+    utils_1.print("Watcher Ready !", src, dst);
 }; };
-exports.unLinkDirListener = function (src, dst) { return function (path) {
-    var dstDir = utils_1.getDestFileMaker(src, dst)(path);
-    utils_1.log("Deleted " + path + " -> " + dstDir);
-    fs.rmdir(dstDir, function (err) {
-        if (err) {
-            utils_1.log('ERRO', err);
-            return;
-        }
-        utils_1.log('OK');
-    });
-}; };
-exports.unLinkListener = function (src, dst) { return function (path) {
-    var dstDir = utils_1.getDestFileMaker(src, dst)(path);
-    utils_1.log("Deleted " + path + " -> " + dstDir);
-    fs.unlink(dstDir, function (err) {
-        if (err) {
-            utils_1.log('ERRO', err);
-            return;
-        }
-        utils_1.log('OK');
-    });
-}; };
-exports.changeListener = function (src, dst) { return function (path, stats) {
-    var dstDir = utils_1.getDestFileMaker(src, dst)(path);
-    utils_1.log("File changed: " + path + " --> " + dstDir);
-    fs.copyFile(path, dstDir, function (err) {
-        if (err) {
-            utils_1.log('Erro copia', err);
-            return;
-        }
-        utils_1.log('OK');
-    });
-}; };
-exports.addListener = function (src, dst) { return function (path, stats) { return __awaiter(_this, void 0, void 0, function () {
-    var dstDir, ok;
+exports.unLinkDirListener = function (src, dst) { return function (observedPath) { return __awaiter(_this, void 0, void 0, function () {
+    var dstDir, error_1;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                dstDir = utils_1.getDestFileMaker(src, dst)(path);
-                utils_1.log("File created: " + path + " --> " + dstDir);
-                return [4 /*yield*/, filesystem_1.folderOrFileExists(dstDir)];
+                dstDir = utils_1.getDestFileMaker(src, dst)(observedPath);
+                utils_1.print("UnlinkDir", observedPath, dstDir);
+                return [4 /*yield*/, !filesystem_1.folderOrFileExists(dstDir)];
             case 1:
-                if (!_a.sent()) return [3 /*break*/, 3];
-                utils_1.log(" Exists " + dstDir + ". Compare...");
-                return [4 /*yield*/, utils_1.filesAreEqual(dstDir, path)];
-            case 2:
                 if (_a.sent()) {
-                    utils_1.log(' Arquivos iguais... pula');
+                    utils_1.deb("%s already handled.", dstDir);
                     return [2 /*return*/];
                 }
-                utils_1.log('diff!');
-                fs.unlink(dstDir, function (err) { return err ? null : utils_1.log('apagou pra copiar'); });
-                _a.label = 3;
-            case 3: return [4 /*yield*/, filesystem_1.createBaseDirectories(dstDir)];
+                _a.label = 2;
+            case 2:
+                _a.trys.push([2, 4, , 5]);
+                return [4 /*yield*/, filesystem_1.recursiveDeleteDirectory(dstDir)];
+            case 3:
+                _a.sent();
+                return [3 /*break*/, 5];
             case 4:
-                ok = _a.sent();
-                if (!ok) {
-                    utils_1.log('Erro na criacao dos subdiretorios');
+                error_1 = _a.sent();
+                utils_1.deb("error deleting directory: %s", dstDir);
+                return [3 /*break*/, 5];
+            case 5: return [2 /*return*/];
+        }
+    });
+}); }; };
+exports.unLinkListener = function (src, dst) { return function (observedPath) { return __awaiter(_this, void 0, void 0, function () {
+    var dstDir;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                dstDir = utils_1.getDestFileMaker(src, dst)(observedPath);
+                utils_1.print("Unlink", observedPath, dstDir);
+                return [4 /*yield*/, !filesystem_1.folderOrFileExists(dstDir)];
+            case 1:
+                if (_a.sent()) {
+                    utils_1.deb("%s already handled.", dstDir);
+                    return [2 /*return*/];
                 }
-                fs.copyFile(path, dstDir, function (err) {
+                fs.unlink(dstDir, function (err) {
                     if (err) {
-                        utils_1.log('Erro copia', err);
+                        utils_1.deb("ERR unlink %o", err);
                         return;
                     }
-                    utils_1.log('OK');
+                    utils_1.deb("Unlink %s OK", dstDir);
                 });
                 return [2 /*return*/];
         }
     });
 }); }; };
-exports.addDirListener = function (src, dst) { return function (path, stats) {
-    var dstDir = utils_1.getDestFileMaker(src, dst)(path);
-    utils_1.log("File created: " + path + " --> " + dstDir);
-    fs.mkdir(dstDir, function (err) {
+exports.changeListener = function (src, dst) { return function (observedPath, stats) {
+    var dstDir = utils_1.getDestFileMaker(src, dst)(observedPath);
+    utils_1.print("Change", observedPath, dstDir);
+    fs.copyFile(observedPath, dstDir, function (err) {
         if (err) {
-            utils_1.log('Erro copia', err);
+            utils_1.deb("ERR change -> copy %o", err);
             return;
         }
-        utils_1.log('OK');
+        utils_1.deb("change > copy %s OK", dstDir);
     });
 }; };
+exports.addListener = function (src, dst) { return function (observedPath, stats) { return __awaiter(_this, void 0, void 0, function () {
+    var dstDir, ok;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                dstDir = utils_1.getDestFileMaker(src, dst)(observedPath);
+                utils_1.print("Add", observedPath, dstDir);
+                return [4 /*yield*/, filesystem_1.folderOrFileExists(dstDir)];
+            case 1:
+                if (!_a.sent()) return [3 /*break*/, 3];
+                utils_1.deb("Exists %s. Compare...", dstDir);
+                return [4 /*yield*/, utils_1.filesAreEqual(dstDir, observedPath)];
+            case 2:
+                if (_a.sent()) {
+                    utils_1.deb("Same file %s and %s. SKIP ADD", observedPath, dstDir);
+                    return [2 /*return*/];
+                }
+                utils_1.deb("add - files are different %s - %s", observedPath, dstDir);
+                fs.unlink(dstDir, function (err) {
+                    if (err) {
+                        utils_1.deb("File %s not unlinked.", dstDir);
+                    }
+                    else {
+                        utils_1.deb("File %s successfully unlinked... Ready to copy the new version", dstDir);
+                    }
+                });
+                _a.label = 3;
+            case 3: return [4 /*yield*/, filesystem_1.createBaseDirectories(dstDir)];
+            case 4:
+                ok = _a.sent();
+                if (!ok) {
+                    utils_1.deb("Error creating base directories for %s", dstDir);
+                }
+                fs.copyFile(observedPath, dstDir, function (err) {
+                    if (err) {
+                        utils_1.deb("ERR add | -> copy %o", err);
+                        return;
+                    }
+                    utils_1.deb("add > copy %s OK", dstDir);
+                });
+                return [2 /*return*/];
+        }
+    });
+}); }; };
+exports.addDirListener = function (src, dst) { return function (observedPath, stats) { return __awaiter(_this, void 0, void 0, function () {
+    var dstDir;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                dstDir = utils_1.getDestFileMaker(src, dst)(observedPath);
+                utils_1.print("AddDirectory", observedPath, dstDir);
+                return [4 /*yield*/, filesystem_1.folderOrFileExists(dstDir)];
+            case 1:
+                if (_a.sent()) {
+                    utils_1.deb("Dir %s already exists. SKIP MKDIR.", dstDir);
+                    return [2 /*return*/];
+                }
+                fs.mkdir(dstDir, function (err) {
+                    if (err) {
+                        utils_1.deb("ERR mkdir %o", err);
+                        return;
+                    }
+                    utils_1.deb("mkdir %s OK", dstDir);
+                });
+                return [2 /*return*/];
+        }
+    });
+}); }; };

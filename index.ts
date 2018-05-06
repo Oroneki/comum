@@ -1,1 +1,1 @@
-export {comum} from './lib/comum';
+export {comum} from "./lib/comum";

@@ -1,13 +1,27 @@
+import chalk from "chalk";
 import * as chokidar from "chokidar";
 import * as crypto from "crypto";
+import debug from "debug";
 import * as fs from "fs";
 import * as path from "path";
 
+export const print = (event: string, file: string,  ...args: any[]) => {
+    console.log(
+        chalk.bold.green.bgYellow(event),
+        " ",
+        chalk.bgYellowBright.magenta(file),
+        " > ",
+        chalk.green(...args),
+    );
+};
+
+export const deb = debug("comum");
+
 export const log = (a: any, ...args: any[]) => {
     if (args) {
-        console.log(a, ...args);
+        console.log(chalk.green(a, ...args));
     } else {
-        console.log(a);
+        console.log(chalk.green(a));
     }
 };
 

@@ -1,6 +1,10 @@
-import { EFileDirectoryNotExists } from './interfaces';
+import { EFileDirectoryNotExists } from "./interfaces";
 export declare const folderOrFileExists: (folderOrFile: string) => Promise<{}>;
 export declare const parentExists: (fullpath: string) => Promise<string | null>;
 export declare const isFile1OrDirectory2OrNotExists0: (fullpath: string) => Promise<EFileDirectoryNotExists>;
 export declare const notExistTailList: (fullpath: string) => Promise<string[] | null>;
 export declare const createBaseDirectories: (dstFullPath: string) => Promise<boolean>;
+export declare const listAllInsideDir: (fullpath: string) => Promise<string[]>;
+export declare const recursiveListInsideDir: (fullpath: string) => Promise<[string[], string[]]>;
+export declare const awaitableRmDir: (directory: string) => Promise<{}>;
+export declare const recursiveDeleteDirectory: (fullpath: string) => Promise<void>;

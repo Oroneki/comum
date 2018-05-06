@@ -1,97 +1,117 @@
 // import * as chalk from 'chalk';
 import * as chokidar from "chokidar";
 // import * as path from 'path';
-import * as fs from 'fs';
+import * as fs from "fs";
 
 import {
+    deb,
+    filesAreEqual,
+    getDestFileMaker,
     log,
     makeWatcher,
+    print,
     returnAbsolutePath,
-    getDestFileMaker,
-    filesAreEqual,
-} from '../util/utils';
+} from "../util/utils";
 
-import {IStats} from '../util/interfaces';
+import {IStats} from "../util/interfaces";
 
 import {
     createBaseDirectories,
     folderOrFileExists,
-} from '../util/filesystem';
+    recursiveDeleteDirectory,
+} from "../util/filesystem";
 
 export const readyListener = (src: string, dst: string) => () => {
-    log('Monitoring ', src, '-->', dst);
-}
+    print("Watcher Ready !", src, dst);
+};
 
-export const unLinkDirListener = (src: string, dst: string) => (targetPath: string) => {
-    const dstDir = getDestFileMaker(src, dst)(targetPath);
-    log(`Deleted ${targetPath} -> ${dstDir}`);
-    fs.rmdir(dstDir, (err) => {
-        if (err) {
-            log('ERRO', err);
-            return
-        }
-        log('OK')
-    });
-}
+export const unLinkDirListener = (src: string, dst: string) => async (observedPath: string) => {
+    const dstDir = getDestFileMaker(src, dst)(observedPath);
+    print("UnlinkDir", observedPath, dstDir);
+    if (await !folderOrFileExists(dstDir)) {
+        deb("%s already handled.", dstDir);
+        return;
+    }
+    try {
+        await recursiveDeleteDirectory(dstDir);
+    } catch (error) {
+        deb("error deleting directory: %s", dstDir);
+    }
+};
 
-export const unLinkListener = (src: string, dst: string) => (targetPath: string) => {
-    const dstDir = getDestFileMaker(src, dst)(targetPath);
-    log(`Deleted ${targetPath} -> ${dstDir}`);
+export const unLinkListener = (src: string, dst: string) => async (observedPath: string) => {
+    const dstDir = getDestFileMaker(src, dst)(observedPath);
+    print("Unlink", observedPath, dstDir);
+    if (await !folderOrFileExists(dstDir)) {
+        deb("%s already handled.", dstDir);
+        return;
+    }
     fs.unlink(dstDir, (err) => {
         if (err) {
-            log('ERRO', err);
-            return
+            deb("ERR unlink %o", err);
+            return;
         }
-        log('OK')
+        deb("Unlink %s OK", dstDir);
     });
-}
+};
 
-export const changeListener = (src: string, dst: string) => (targetPath: string, stats: IStats) => {
-    const dstDir = getDestFileMaker(src, dst)(targetPath);
-    log(`File changed: ${targetPath} --> ${dstDir}`);
-    fs.copyFile(targetPath, dstDir, (err) => {
+export const changeListener = (src: string, dst: string) => (observedPath: string, stats: IStats) => {
+    const dstDir = getDestFileMaker(src, dst)(observedPath);
+    print("Change", observedPath, dstDir);
+    fs.copyFile(observedPath, dstDir, (err) => {
         if (err) {
-            log('Erro copia', err)
-            return
+            deb("ERR change -> copy %o", err);
+            return;
         }
-        log('OK')
-    })
+        deb("change > copy %s OK", dstDir);
+    });
 
-}
+};
 
-export const addListener = (src: string, dst: string) => async (targetPath: string, stats: IStats) => {
-    const dstDir = getDestFileMaker(src, dst)(targetPath);
-    log(`File created: ${targetPath} --> ${dstDir}`);
+export const addListener = (src: string, dst: string) => async (observedPath: string, stats: IStats) => {
+    const dstDir = getDestFileMaker(src, dst)(observedPath);
+    print("Add", observedPath, dstDir);
     if (await folderOrFileExists(dstDir)) {
-        log(` Exists ${dstDir}. Compare...`);
-        if (await filesAreEqual(dstDir, targetPath)) {
-            log(' Arquivos iguais... pula');
-            return
+        deb("Exists %s. Compare...", dstDir);
+        if (await filesAreEqual(dstDir, observedPath)) {
+            deb("Same file %s and %s. SKIP ADD", observedPath, dstDir);
+            return;
         }
-        log('diff!');
-        fs.unlink(dstDir, (err) => err ? null : log('apagou pra copiar'))
+        deb("add - files are different %s - %s", observedPath, dstDir);
+        fs.unlink(dstDir, (err) => {
+            if (err) {
+                deb("File %s not unlinked.", dstDir);
+            } else {
+                deb("File %s successfully unlinked... Ready to copy the new version", dstDir);
+            }
+
+        });
     }
     const ok = await createBaseDirectories(dstDir);
     if (!ok) {
-        log('Erro na criacao dos subdiretorios')
+        deb("Error creating base directories for %s", dstDir);
     }
-    fs.copyFile(targetPath, dstDir, (err) => {
+    fs.copyFile(observedPath, dstDir, (err) => {
         if (err) {
-            log('Erro copia', err)
-            return
+            deb("ERR add | -> copy %o", err);
+            return;
         }
-        log('OK')
-    })
-}
+        deb("add > copy %s OK", dstDir);
+    });
+};
 
-export const addDirListener = (src: string, dst: string) => (targetPath: string, stats: IStats) => {
-    const dstDir = getDestFileMaker(src, dst)(targetPath);
-    log(`File created: ${targetPath} --> ${dstDir}`);
+export const addDirListener = (src: string, dst: string) => async (observedPath: string, stats: IStats) => {
+    const dstDir = getDestFileMaker(src, dst)(observedPath);
+    print("AddDirectory", observedPath, dstDir);
+    if (await folderOrFileExists(dstDir)) {
+        deb("Dir %s already exists. SKIP MKDIR.", dstDir);
+        return;
+    }
     fs.mkdir(dstDir, (err) => {
         if (err) {
-            log('Erro copia', err)
-            return
+            deb("ERR mkdir %o", err);
+            return;
         }
-        log('OK')
-    })    
-}
+        deb("mkdir %s OK", dstDir);
+    });
+};

@@ -34,6 +34,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
@@ -43,20 +46,30 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 var _this = this;
 Object.defineProperty(exports, "__esModule", { value: true });
+var chalk_1 = __importDefault(require("chalk"));
 var chokidar = __importStar(require("chokidar"));
-var path = __importStar(require("path"));
 var crypto = __importStar(require("crypto"));
+var debug_1 = __importDefault(require("debug"));
 var fs = __importStar(require("fs"));
+var path = __importStar(require("path"));
+exports.print = function (event, file) {
+    var args = [];
+    for (var _i = 2; _i < arguments.length; _i++) {
+        args[_i - 2] = arguments[_i];
+    }
+    console.log(chalk_1.default.bold.green.bgYellow(event), " ", chalk_1.default.bgYellowBright.magenta(file), " > ", chalk_1.default.green.apply(chalk_1.default, args));
+};
+exports.deb = debug_1.default("comum");
 exports.log = function (a) {
     var args = [];
     for (var _i = 1; _i < arguments.length; _i++) {
         args[_i - 1] = arguments[_i];
     }
     if (args) {
-        console.log.apply(console, [a].concat(args));
+        console.log(chalk_1.default.green.apply(chalk_1.default, [a].concat(args)));
     }
     else {
-        console.log(a);
+        console.log(chalk_1.default.green(a));
     }
 };
 exports.returnAbsolutePath = function (strPath) {
@@ -69,15 +82,15 @@ exports.returnAbsolutePath = function (strPath) {
 };
 exports.makeWatcher = function (folder) {
     var folderAbs = exports.returnAbsolutePath(folder);
-    exports.log('folderAbs', folderAbs);
+    exports.log("folderAbs", folderAbs);
     return chokidar.watch(folderAbs, {
-        persistent: true,
-        interval: 200,
-        binaryInterval: 400,
         awaitWriteFinish: {
+            pollInterval: 300,
             stabilityThreshold: 1500,
-            pollInterval: 300
         },
+        binaryInterval: 400,
+        interval: 200,
+        persistent: true,
     });
 };
 exports.getDiffPath = function (src, fullpath) {
@@ -104,13 +117,13 @@ exports.filesAreEqual = function (file1, file2) { return __awaiter(_this, void 0
         }
     });
 }); };
-function checksumFile(path, hashName) {
-    if (hashName === void 0) { hashName = 'md5'; }
+function checksumFile(entryPath, hashName) {
+    if (hashName === void 0) { hashName = "md5"; }
     return new Promise(function (resolve, reject) {
         var hash = crypto.createHash(hashName);
-        var stream = fs.createReadStream(path);
-        stream.on('error', function (err) { return reject(err); });
-        stream.on('data', function (chunk) { return hash.update(chunk); });
-        stream.on('end', function () { return resolve(hash.digest('hex')); });
+        var stream = fs.createReadStream(entryPath);
+        stream.on("error", function (err) { return reject(err); });
+        stream.on("data", function (chunk) { return hash.update(chunk); });
+        stream.on("end", function () { return resolve(hash.digest("hex")); });
     });
 }
