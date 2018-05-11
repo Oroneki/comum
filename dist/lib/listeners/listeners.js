@@ -79,27 +79,34 @@ exports.unLinkDirListener = function (src, dst) { return function (observedPath)
     });
 }); }; };
 exports.unLinkListener = function (src, dst) { return function (observedPath) { return __awaiter(_this, void 0, void 0, function () {
+    var _this = this;
     var dstDir;
     return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                dstDir = utils_1.getDestFileMaker(src, dst)(observedPath);
-                utils_1.print("Unlink", observedPath, dstDir);
-                return [4 /*yield*/, !filesystem_1.folderOrFileExists(dstDir)];
-            case 1:
-                if (_a.sent()) {
-                    utils_1.deb("%s already handled.", dstDir);
-                    return [2 /*return*/];
-                }
-                fs.unlink(dstDir, function (err) {
-                    if (err) {
+        dstDir = utils_1.getDestFileMaker(src, dst)(observedPath);
+        utils_1.print("Unlink", observedPath, dstDir);
+        fs.unlink(dstDir, function (err) { return __awaiter(_this, void 0, void 0, function () {
+            var exists;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!err) return [3 /*break*/, 2];
+                        return [4 /*yield*/, filesystem_1.folderOrFileExists(dstDir)];
+                    case 1:
+                        exists = _a.sent();
+                        if (!exists) {
+                            utils_1.deb("Unlink already handled %s OK", dstDir);
+                            return [2 /*return*/];
+                        }
                         utils_1.deb("ERR unlink %o", err);
-                        return;
-                    }
-                    utils_1.deb("Unlink %s OK", dstDir);
-                });
-                return [2 /*return*/];
-        }
+                        return [2 /*return*/];
+                    case 2:
+                        utils_1.deb("Unlink %s OK", dstDir);
+                        _a.label = 3;
+                    case 3: return [2 /*return*/];
+                }
+            });
+        }); });
+        return [2 /*return*/];
     });
 }); }; };
 exports.changeListener = function (src, dst) { return function (observedPath, stats) {

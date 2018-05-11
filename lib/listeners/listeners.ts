@@ -42,16 +42,18 @@ export const unLinkDirListener = (src: string, dst: string) => async (observedPa
 export const unLinkListener = (src: string, dst: string) => async (observedPath: string) => {
     const dstDir = getDestFileMaker(src, dst)(observedPath);
     print("Unlink", observedPath, dstDir);
-    if (await !folderOrFileExists(dstDir)) {
-        deb("%s already handled.", dstDir);
-        return;
-    }
-    fs.unlink(dstDir, (err) => {
+    fs.unlink(dstDir, async (err) => {
         if (err) {
+            const exists = await folderOrFileExists(dstDir);
+            if (!exists) {
+                deb("Unlink already handled %s OK", dstDir);
+                return;
+            }
             deb("ERR unlink %o", err);
             return;
+        } else {
+            deb("Unlink %s OK", dstDir);
         }
-        deb("Unlink %s OK", dstDir);
     });
 };
 
