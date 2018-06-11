@@ -1,25 +1,19 @@
 #!/usr/bin/env node
-import {comum} from "./lib/comum";
+import * as path from "path";
+import {parser} from "./lib/parser";
 import {log} from "./lib/util/utils";
 
-if (!process.argv[2] || !process.argv[3]) {
-    log("provide source folder and destination folder.");
-    process.exit(1);
-}
+const returnComum = () => {
+    if (!process.argv[2]) {
+        return parser(path.resolve(process.cwd(), "comum.json"));
+    } else {
+        return parser(path.resolve(process.cwd(), process.argv[2]));
+    }
+};
 
-if (process.argv[4]) {
+if (process.argv[3]) {
     log("too many args");
     process.exit(1);
 }
 
-log(`
-===========================================
-SOURCE: ${process.argv[2]}
-DESTINATION: ${process.argv[3]}
-===========================================
-`);
-
-comum(
-    process.argv[2],
-    process.argv[3],
-);
+returnComum();

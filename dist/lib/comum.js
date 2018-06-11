@@ -12,6 +12,7 @@ exports.comum = function (sharedFolder, dstFolder) {
     watcher.on("change", listeners_1.changeListener(src, dst));
     watcher.on("addDir", listeners_1.addDirListener(src, dst));
     watcher.on("unlinkDir", listeners_1.unLinkDirListener(src, dst));
+    return watcher;
 };
 exports.test = function () {
     exports.comum("../../Downloads/teste/src", "../../Downloads/teste/dst");

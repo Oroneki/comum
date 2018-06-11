@@ -29,6 +29,8 @@ export const comum = (sharedFolder: string, dstFolder: string) => {
     watcher.on("change", changeListener(src, dst));
     watcher.on("addDir", addDirListener(src, dst));
     watcher.on("unlinkDir", unLinkDirListener(src, dst));
+
+    return watcher;
 };
 
 export const test = () => {

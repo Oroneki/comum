@@ -7,10 +7,7 @@ import {
     deb,
     filesAreEqual,
     getDestFileMaker,
-    log,
-    makeWatcher,
     print,
-    returnAbsolutePath,
 } from "../util/utils";
 
 import {IStats} from "../util/interfaces";
