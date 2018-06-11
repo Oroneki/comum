@@ -1,6 +1,6 @@
 {
   "name": "comum",
-  "version": "0.0.2-alpha.3",
+  "version": "0.0.2-alpha.4",
   "description": "Sync monorepo shared folders",
   "main": "dist/index.js",
   "typings": "dist/index.d.js",
@@ -28,7 +28,7 @@
     "typescript": "^2.8.3"
   },
   "dependencies": {
-    "chokidar": "^2.0.3",
-    "chalk": "^2.4.1"
+    "chalk": "^2.4.1",
+    "chokidar": "^2.0.3"
   }
 }
