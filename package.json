@@ -27,6 +27,9 @@
     "tslint": "^5.10.0",
     "typescript": "^2.8.3"
   },
+  "files": [
+	"dist"
+  ],
   "dependencies": {
     "chalk": "^2.4.1",
     "chokidar": "^2.0.3"
